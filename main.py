@@ -1,15 +1,21 @@
 import time
-
 import cv2
 
-
 video = cv2.VideoCapture(0)
-check, frame = video.read()
-time.sleep(1)
-check2, frame2 = video.read()
-time.sleep(1)
-check3, frame3 = video.read()
+
+# to avoid blank frames and give camera time to load
+# if its inside while loop the video lags for every second
 time.sleep(1)
 
-print(video)
-print(frame)
+while True:
+    check, frame = video.read()
+    cv2.imshow("My video", frame)
+
+    # create keyboard key object
+    key = cv2.waitKey(1)
+
+    # if user press q key it breaks the video i.e, stops the program
+    if key == ord("q"):
+        break
+
+video.release()
