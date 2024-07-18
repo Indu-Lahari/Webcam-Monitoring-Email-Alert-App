@@ -21,7 +21,26 @@ while True:
         first_frame = gray_frame_gau
 
     delta_frame = cv2.absdiff(first_frame, gray_frame_gau)
-    cv2.imshow("My video", delta_frame)
+
+    thresh_frame = cv2.threshold(delta_frame, 60, 255, cv2.THRESH_BINARY)[1]
+    #to remove noise ,None - Configuration array
+    dilated_frame = cv2.dilate(thresh_frame, None, iterations=2)
+    cv2.imshow("My video", dilated_frame)
+
+    # to create contours
+    contours, check = cv2.findContours(dilated_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # if the contour is smaller than other contour we say its a fake object
+    for contour in contours:
+        if cv2.contourArea(contour) < 10000:
+            continue
+
+        # to create rectangle around the objects
+        x, y, w, h = cv2.boundingRect(contour)
+        # rectangle has 5 arguments
+        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 3)
+
+    #display original frame
+    cv2.imshow("Video", frame)
 
     # create keyboard key object
     key = cv2.waitKey(1)
