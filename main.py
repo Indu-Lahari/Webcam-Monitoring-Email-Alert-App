@@ -1,14 +1,16 @@
 import time
 import cv2
-
+from gmail import send_mail
 video = cv2.VideoCapture(0)
 
 # to avoid blank frames and give camera time to load; if its inside while loop the video lags for every second
 time.sleep(1)
 
 first_frame = None
+status_list = []
 
 while True:
+    status = 0
     check, frame = video.read()
 
     # convert frames to grayscale frames to reduce the amount of data in matrices
@@ -31,13 +33,24 @@ while True:
     contours, check = cv2.findContours(dilated_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     # if the contour is smaller than other contour we say its a fake object
     for contour in contours:
-        if cv2.contourArea(contour) < 10000:
+        if cv2.contourArea(contour) < 5000:
             continue
 
         # to create rectangle around the objects
         x, y, w, h = cv2.boundingRect(contour)
         # rectangle has 5 arguments
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 3)
+        rectangle = cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 3)
+        #Trigger action , used any() as it is ambiguous(error)
+        if rectangle.any():
+            status = 1
+
+    status_list.append(status)
+    status_list = status_list[-2:]
+
+    if status_list[0] == 1 and status_list[1] == 0:
+        send_mail()
+
+    print(status_list)
 
     #display original frame
     cv2.imshow("Video", frame)
