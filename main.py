@@ -6,6 +6,8 @@ video = cv2.VideoCapture(0)
 # to avoid blank frames and give camera time to load; if its inside while loop the video lags for every second
 time.sleep(1)
 
+first_frame = None
+
 while True:
     check, frame = video.read()
 
@@ -15,8 +17,11 @@ while True:
     # 3 arguments are grayframe, blurness size and Standard Deviation
     gray_frame_gau = cv2.GaussianBlur(gray_frame, (21, 21), 0)
 
+    if first_frame is None:
+        first_frame = gray_frame_gau
 
-    cv2.imshow("My video", gray_frame_gau)
+    delta_frame = cv2.absdiff(first_frame, gray_frame_gau)
+    cv2.imshow("My video", delta_frame)
 
     # create keyboard key object
     key = cv2.waitKey(1)
