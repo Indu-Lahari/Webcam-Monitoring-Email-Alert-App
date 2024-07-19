@@ -1,13 +1,15 @@
+import glob
 import time
 import cv2
 from gmail import send_mail
 video = cv2.VideoCapture(0)
 
-# to avoid blank frames and give camera time to load; if its inside while loop the video lags for every second
+# to avoid blank frames and give camera time to load; if its inside while loop, the video lags for every second
 time.sleep(1)
 
 first_frame = None
 status_list = []
+count = 1
 
 while True:
     status = 0
@@ -31,7 +33,7 @@ while True:
 
     # to create contours
     contours, check = cv2.findContours(dilated_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    # if the contour is smaller than other contour we say its a fake object
+    # if the contour is smaller than other contour we say it's a fake object
     for contour in contours:
         if cv2.contourArea(contour) < 5000:
             continue
@@ -43,6 +45,13 @@ while True:
         #Trigger action , used any() as it is ambiguous(error)
         if rectangle.any():
             status = 1
+            # to store images from video. Here img.png is static so f{count} males it dynamic
+            cv2.imwrite(f"images/{count}.png", frame)
+            count = count + 1
+            # Getting only middle or one image
+            all_images = glob.glob("images/*.png")
+            index = int(len(all_images) / 2)
+            image_with_object = all_images[index]
 
     status_list.append(status)
     status_list = status_list[-2:]
