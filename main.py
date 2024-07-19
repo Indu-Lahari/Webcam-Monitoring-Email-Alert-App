@@ -1,15 +1,23 @@
 import glob
 import time
 import cv2
+import os
 from gmail import send_mail
-video = cv2.VideoCapture(0)
 
+video = cv2.VideoCapture(0)
 # to avoid blank frames and give camera time to load; if its inside while loop, the video lags for every second
 time.sleep(1)
 
 first_frame = None
 status_list = []
 count = 1
+
+
+def clean_folder():
+    images = glob.glob("images/*.png")
+    for image in images:
+        os.remove(image)
+
 
 while True:
     status = 0
