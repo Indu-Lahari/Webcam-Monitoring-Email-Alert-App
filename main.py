@@ -3,6 +3,7 @@ import time
 import cv2
 import os
 from gmail import send_mail
+from threading import Thread
 
 video = cv2.VideoCapture(0)
 # to avoid blank frames and give camera time to load; if its inside while loop, the video lags for every second
@@ -14,9 +15,11 @@ count = 1
 
 
 def clean_folder():
+    print("clean_folder function started")
     images = glob.glob("images/*.png")
     for image in images:
         os.remove(image)
+    print("clean_folder function ended")
 
 
 while True:
@@ -58,15 +61,27 @@ while True:
             count = count + 1
             # Getting only middle or one image
             all_images = glob.glob("images/*.png")
-            index = int(len(all_images) / 2)
-            image_with_object = all_images[index]
 
+            if all_images:  # Check if list is not empty
+                index = int(len(all_images) / 2)
+                if index < len(all_images):  # Ensure index is within bounds
+                    image_with_object = all_images[index]
+                else:
+                    image_with_object = all_images[-1]  # Use the last image if index is out of range
+                print(f"Image selected for email: {image_with_object}")
 
     status_list.append(status)
     status_list = status_list[-2:]
 
     if status_list[0] == 1 and status_list[1] == 0:
-        send_mail(image_with_object)
+        if 'image_with_object' in locals():  # Check if image_with_object is defined
+            mail_thread = Thread(target=send_mail, args=(image_with_object, ))
+            mail_thread.daemon = True
+            clean_thread = Thread(target=clean_folder)
+            clean_thread.daemon = True
+
+            clean_thread.start()
+            mail_thread.start()
 
     print(status_list)
 
@@ -75,9 +90,10 @@ while True:
 
     # create keyboard key object
     key = cv2.waitKey(1)
-
     # if user press q key it breaks the video i.e, stops the program
     if key == ord("q"):
         break
 
 video.release()
+
+cv2.destroyAllWindows()
