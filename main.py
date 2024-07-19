@@ -53,11 +53,12 @@ while True:
             index = int(len(all_images) / 2)
             image_with_object = all_images[index]
 
+
     status_list.append(status)
     status_list = status_list[-2:]
 
     if status_list[0] == 1 and status_list[1] == 0:
-        send_mail()
+        send_mail(image_with_object)
 
     print(status_list)
 
